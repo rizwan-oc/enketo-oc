@@ -1,8 +1,0 @@
-{
-    "query parameter to pass to submission": "ecid",
-    "redis": {
-        "cache": {
-            "port": "6379"
-        }
-    }
-}
