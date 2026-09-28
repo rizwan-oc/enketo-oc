@@ -467,7 +467,15 @@ export default {
             this._toggleButtons(newIndex);
             pageEl.dispatchEvent(events.PageFlip());
             this.form.goToTarget(pageEl, { isPageFlip: true });
-            pageEl.setAttribute('tabindex', 1);
+
+            // OC-27867: don't make field-list group containers focusable. On iOS
+            // Safari a tap inside the group can focus the container (as the
+            // nearest focusable ancestor), which renders extra blank space and
+            // shifts the layout mid-tap, swallowing the first tap. See the
+            // matching skip in _focusOnFirstQuestion (#258).
+            if (!pageEl.classList.contains('or-appearance-field-list')) {
+                pageEl.setAttribute('tabindex', 1);
+            }
         }
     },
     /**
@@ -500,8 +508,13 @@ export default {
             .eq(0)
             .trigger('fakefocus');
 
-        // focus on element
-        pageEl.focus();
+        // Focusing the field-list group container on iOS Safari causes it to
+        // render extra blank space inside the div, creating a layout shift when
+        // the user first taps a radio button (tap lands in wrong position).
+        // goToTarget() already focuses the first input, so skip this for field-list groups.
+        if (!pageEl.classList.contains('or-appearance-field-list')) {
+            pageEl.focus();
+        }
 
         pageEl.scrollIntoView();
     },

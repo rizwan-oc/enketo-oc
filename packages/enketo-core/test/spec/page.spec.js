@@ -72,6 +72,80 @@ describe('Pages mode', () => {
         });
     });
 
+    describe('_focusOnFirstQuestion', () => {
+        /** @type {import('sinon').SinonSandbox} */
+        let sandbox;
+
+        beforeEach(() => {
+            sandbox = sinon.createSandbox();
+        });
+
+        afterEach(() => {
+            sandbox.restore();
+        });
+
+        it('does not call focus() on field-list group page element', () => {
+            const form = loadForm('groups-pages.xml');
+            form.init();
+
+            const fieldListPage = form.view.html.querySelector(
+                '.or-appearance-field-list'
+            );
+            const focusSpy = sandbox.spy(fieldListPage, 'focus');
+
+            form.pages.flipToPageContaining([fieldListPage]);
+
+            expect(focusSpy).not.to.have.been.called;
+        });
+
+        it('calls focus() on non-field-list page element', () => {
+            const form = loadForm('groups-pages.xml');
+            form.init();
+
+            // Flip to a field-list page first so the non-field-list target
+            // is not the current page when the spy is set up
+            const fieldListPage = form.view.html.querySelector(
+                '.or-appearance-field-list'
+            );
+            form.pages.flipToPageContaining([fieldListPage]);
+
+            const questionPage = form.view.html.querySelector(
+                '.question[role="page"]'
+            );
+            const focusSpy = sandbox.spy(questionPage, 'focus');
+
+            form.pages.flipToPageContaining([questionPage]);
+
+            expect(focusSpy).to.have.been.called;
+        });
+    });
+
+    describe('OC-27867: _flipTo tabindex on initial page', () => {
+        it('does not make a field-list group the first page tap-focusable', () => {
+            const form = loadForm('field-list-first-page.xml');
+            form.init();
+
+            const firstPage = form.pages.current;
+
+            expect(
+                firstPage.classList.contains('or-appearance-field-list')
+            ).to.equal(true);
+            expect(firstPage.hasAttribute('tabindex')).to.equal(false);
+        });
+
+        it('still makes a non-field-list first page tap-focusable', () => {
+            const form = loadForm('groups-pages.xml');
+            form.init();
+
+            const firstPage = form.pages.current;
+
+            expect(
+                firstPage.classList.contains('or-appearance-field-list')
+            ).to.equal(false);
+            expect(firstPage.getAttribute('tabindex')).to.equal('1');
+        });
+    });
+
     // TODO: this should be in toc.spec.js, but the functionality is not
     // implemented there either, and it may be confusing to test functionality
     // of one module in the test module for another.
