@@ -44,6 +44,7 @@ Thumbs.db
 # 5.1. Tooling - development
 # -----------------------------------------------------------------------------
 
+/.worktrees/
 /.grunt/
 /examples/*/.grunt/
 /packages/*/.grunt/
